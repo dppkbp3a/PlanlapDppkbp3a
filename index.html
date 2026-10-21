@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Informasi Bidang Program - DPPKBP3A Kab. Kuningan</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS untuk Export/Import Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .bkkbn-logo-img {
+            max-width: 100px;
+            height: auto;
+            margin-bottom: 1rem;
+        }
+
+        /* CSS Khusus Cetak/Print Multi-Halaman */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+
+            #sidebar,
+            header,
+            .no-print,
+            #crud-modal {
+                display: none !important;
+            }
+
+            .md\:ml-64 {
+                margin-left: 0 !important;
+            }
+
+            main {
+                padding: 0 !important;
+            }
+
+            .card-box {
+                border: none !important;
+                shadow: none !important;
+            }
+
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                page-break-inside: auto;
+            }
+
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+
+            thead {
+                display: table-header-group;
+            }
+
+            th,
+            td {
+                border: 1px solid #ddd !important;
+                padding: 8px !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100 min-h-screen text-slate-800">
+
+    <!-- ========================================== -->
+    <!-- BAGIAN 1: HALAMAN LOGIN                    -->
+    <!-- ========================================== -->
+    <div id="login-page"
+        class="min-h-screen bg-gradient-to-tr from-[#3b9bc2] via-[#6baedb] to-[#2563eb] flex flex-col justify-between p-6 md:p-10 relative overflow-x-hidden">
+        <header class="flex justify-between items-center w-full max-w-7xl mx-auto z-10">
+            <div class="text-white font-extrabold tracking-wider text-lg md:text-xl leading-tight">
+                PLANLAP<br>
+                <span class="text-base md:text-lg font-medium opacity-90">PERENCANAAN DAN PELAPORAN DPPKBP3A</span>
+            </div>
+            <div>
+                <span
+                    class="text-white font-semibold text-sm tracking-widest uppercase bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-md">KAB.
+                    KUNINGAN</span>
+            </div>
+        </header>
+
+        <main class="flex items-center justify-center my-auto py-8 z-10 w-full">
+            <div
+                class="bg-white/95 backdrop-blur-xl w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2 border border-white/20">
+                <div class="p-8 md:p-12 flex flex-col justify-center">
+                    <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-6 tracking-tight">LOGIN</h1>
+
+                    <!-- Pesan Error Password -->
+                    <div id="login-error-msg"
+                        class="hidden mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation text-sm"></i>
+                        <span>kata sandi salah coba lagi</span>
+                    </div>
+
+                    <form onsubmit="handleLogin(event)" class="space-y-5">
+                        <div class="relative border-b-2 border-slate-300 focus-within:border-blue-600 transition pb-2">
+                            <div class="flex items-center">
+                                <span class="text-blue-600 mr-3 text-lg"><i class="fa-solid fa-user"></i></span>
+                                <input type="text" id="username" placeholder="NIP / Username" required
+                                    class="w-full bg-transparent border-none outline-none text-slate-800 placeholder-slate-400 text-sm font-medium">
+                            </div>
+                        </div>
+                        <div class="relative border-b-2 border-slate-300 focus-within:border-blue-600 transition pb-2">
+                            <div class="flex items-center">
+                                <span class="text-blue-600 mr-3 text-lg"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" id="password" placeholder="Password" required
+                                    class="w-full bg-transparent border-none outline-none text-slate-800 placeholder-slate-400 text-sm font-medium pr-10">
+                                <button type="button" onclick="togglePassword()"
+                                    class="absolute right-0 text-slate-400 hover:text-slate-600">
+                                    <i id="eyeIcon" class="fa-solid fa-eye-slash"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Pilihan Mode Akses -->
+                        <div class="pt-2">
+                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">MASUK
+                                SEBAGAI:</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label
+                                    class="flex items-center justify-center gap-2 p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 transition text-xs font-bold text-slate-700">
+                                    <input type="radio" name="userRole" value="admin" checked
+                                        class="text-blue-600 focus:ring-blue-500">
+                                    <i class="fa-solid fa-user-gear text-blue-600 text-sm"></i> Mode Admin
+                                </label>
+                                <label
+                                    class="flex items-center justify-center gap-2 p-3 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-emerald-500 hover:bg-emerald-50/50 transition text-xs font-bold text-slate-700">
+                                    <input type="radio" name="userRole" value="pegawai"
+                                        class="text-emerald-600 focus:ring-emerald-500">
+                                    <i class="fa-solid fa-user-check text-emerald-600 text-sm"></i> Mode Pegawai
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="pt-3">
+                            <button type="submit"
+                                class="w-full py-3.5 bg-gradient-to-r from-[#110c2e] to-[#251a54] hover:from-[#1b1448] hover:to-[#31236d] text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition duration-200 tracking-wider text-sm">
+                                Masuk Sistem
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div
+                    class="bg-gradient-to-br from-slate-50 to-blue-50/30 p-8 md:p-12 flex flex-col items-center justify-center border-t md:border-t-0 md:border-l border-slate-100">
+                    <div class="text-center flex flex-col items-center">
+                        <img src="LOGO.jpg" alt="Logo BKKBN" class="bkkbn-logo-img drop-shadow-md">
+                        <p
+                            class="text-[11px] font-extrabold text-slate-800 tracking-wider uppercase leading-relaxed mt-2">
+                            BADAN KEPENDUDUKAN DAN KELUARGA<br>BERENCANA NASIONAL
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer class="w-full max-w-7xl mx-auto"></footer>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- BAGIAN 2: HALAMAN DASHBOARD                -->
+    <!-- ========================================== -->
+    <div id="dashboard-page" class="hidden min-h-screen flex w-full">
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar"
+            class="bg-slate-900 text-white w-64 min-h-screen fixed inset-y-0 left-0 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between shadow-2xl border-r border-slate-800">
+            <div>
+                <div class="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
+                    <div>
+                        <h1 class="font-black text-xl tracking-wider text-blue-400 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-blue-500"></i> PLANLAP
+                        </h1>
+                        <p class="text-[11px] text-slate-400 font-semibold tracking-wide">DPPKBP3A KAB. KUNINGAN</p>
+                    </div>
+                    <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+
+                <nav class="p-4 space-y-2 text-sm overflow-y-auto max-h-[calc(100vh-160px)]">
+                    <a href="#" id="menu-link-home" onclick="loadContent('home')"
+                        class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800/80 transition font-medium">
+                        <i class="fa-solid fa-house w-5 text-blue-400"></i> Beranda / Ringkasan
+                    </a>
+
+                    <!-- 1. Pagu Anggaran 2026 -->
+                    <div>
+                        <button onclick="toggleDropdown('menu-pagu')"
+                            class="w-full flex items-center justify-between px-3 py-3 rounded-xl hover:bg-slate-800/80 text-slate-300 transition">
+                            <span class="flex items-center gap-2.5 text-xs font-bold whitespace-nowrap"><i
+                                    class="fa-solid fa-wallet w-5 text-amber-400"></i> 1. Pagu Anggaran 2026</span>
+                            <i id="icon-pagu"
+                                class="fa-solid fa-chevron-down text-xs transition-transform text-slate-400"></i>
+                        </button>
+                        <div id="menu-pagu"
+                            class="hidden pl-9 pr-2 py-1.5 space-y-1 bg-slate-950/50 rounded-xl my-1 border border-slate-800/60">
+                            <a href="#" id="menu-link-pagu-apbd" onclick="loadContent('pagu-apbd')"
+                                class="nav-item block py-2 px-3 text-xs text-slate-400 hover:text-white rounded-lg transition font-medium">-
+                                APBD</a>
+                            <a href="#" id="menu-link-pagu-bokb" onclick="loadContent('pagu-bokb')"
+                                class="nav-item block py-2 px-3 text-xs text-slate-400 hover:text-white rounded-lg transition font-medium">-
+                                APBN DAK BOKB NF</a>
+                            <a href="#" id="menu-link-pagu-boppa" onclick="loadContent('pagu-boppa')"
+                                class="nav-item block py-2 px-3 text-xs text-slate-400 hover:text-white rounded-lg transition font-medium">-
+                                APBN DAK BOPPA NF</a>
+                        </div>
+                    </div>
+
+                    <!-- 2. Realisasi Anggaran 2026 -->
+                    <div>
+                        <button onclick="toggleDropdown('menu-realisasi-anggaran')"
+                            class="w-full flex items-center justify-between px-3 py-3 rounded-xl hover:bg-slate-800/80 text-slate-300 transition">
+                            <span class="flex items-center gap-2.5 text-xs font-bold whitespace-nowrap"><i
+                                    class="fa-solid fa-chart-pie w-5 text-emerald-400"></i> 2. Realisasi Anggaran</span>
+                            <i id="icon-realisasi-anggaran"
+                                class="fa-solid fa-chevron-down text-xs transition-transform text-slate-400"></i>
+                        </button>
+                        <div id="menu-realisasi-anggaran"
+                            class="hidden pl-9 pr-2 py-1.5 space-y-1 bg-slate-950/50 rounded-xl my-1 border border-slate-800/60">
+                            <a href="#" id="menu-link-realisasi-apbd" onclick="loadContent('realisasi-apbd')"
+                                class="nav-item block py-2 px-3 text-xs text-slate-400 hover:text-white rounded-lg transition font-medium">-
+                                APBD</a>
+                            <a href="#" id="menu-link-realisasi-bokb" onclick="loadContent('realisasi-bokb')"
+                                class="nav-item block py-2 px-3 text-xs text-slate-400 hover:text-white rounded-lg transition font-medium">-
+                                APBN DAK BOKB NF</a>
+                            <a href="#" id="menu-link-realisasi-boppa" onclick="loadContent('realisasi-boppa')"
+                                class="nav-item block py-2 px-3 text-xs text-slate-400 hover:text-white rounded-lg transition font-medium">-
+                                APBN DAK BOPPA NF</a>
+                        </div>
+                    </div>
+
+                    <!-- 3. Target Kinerja 2026 -->
+                    <div>
+                        <button onclick="toggleDropdown('menu-target')"
+                            class="w-full flex items-center justify-between px-3 py-3 rounded-xl hover:bg-slate-800/80 text-slate-300 transition">
+                            <span class="flex items-center gap-2.5 text-xs font-bold whitespace-nowrap"><i
+                                    class="fa-solid fa-bullseye w-5 text-purple-400"></i> 3. Target Kinerja 2026</span>
+                            <i id="icon-target"
+                                class="fa-solid fa-chevron-down text-xs transition-transform text-slate-400"></i>
+                        </button>
+                        <div id="menu-target"
+                            class="hidden pl-9 pr-2 py-1.5 space-y-1 bg-slate-950/50 rounded-xl my-1 border border-slate-800/60">
+                            <a href="#" id="menu-link-target-dalduk" onclick="loadContent('target-dalduk')"
+                                class="nav-item block py-2 px-3 text-xs text-slate-400 hover:text-white rounded-lg transition font-medium">-
+                                Bidang Dalduk</a>
+                            <a href="#" id="menu-link-target-kb" onclick="loadContent('target-kb')"
+                                class="nav-item block py-2 px-3 text-xs text-slate-400 hover:text-white rounded-lg transition font-medium">-
+                                Bidang KB</a>
+                            <a href="#" id="menu-link-target-ks" onclick="loadContent('target-ks')"
+                                class="nav-item block py-2 px-3 text-xs text-slate-400 hover:text-white rounded-lg transition font-medium">-
+                                Bidang KS</a>
+                            <a href="#" id="menu-link-target-pppa" onclick="loadContent('target-pppa')"
+                                class="nav-item block py-2 px-3 text-xs text-slate-400 hover:text-white rounded-lg transition font-medium">-
+                                Bidang PPPA</a>
+                            <a href="#" id="menu-link-target-sekretariat" onclick="loadContent('target-sekretariat')"
+                                class="nav-item block py-2 px-3 text-xs text-slate-400 hover:text-white rounded-lg transition font-medium">-
+                                Sekretariat</a>
+                        </div>
+                    </div>
+
+                    <!-- 4. Realisasi Target Kinerja 2026 -->
+                    <div>
+                        <button onclick="toggleDropdown('menu-realisasi-target')"
+                            class="w-full flex items-center justify-between px-3 py-3 rounded-xl hover:bg-slate-800/80 text-slate-300 transition">
+                            <span class="flex items-center gap-2.5 text-xs font-bold whitespace-nowrap"><i
+                                    class="fa-solid fa-square-poll-vertical w-5 text-sky-400"></i> 4. Realisasi
+                                Target</span>
+                            <i id="icon-realisasi-target"
+                                class="fa-solid fa-chevron-down text-xs transition-transform text-slate-400"></i>
+                        </button>
+                        <div id="menu-realisasi-target"
+                            class="hidden pl-9 pr-2 py-1.5 space-y-1 bg-slate-950/50 rounded-xl my-1 border border-slate-800/60">
+                            <a href="#" id="menu-link-realisasi-target-dalduk"
+                                onclick="loadContent('realisasi-target-dalduk')"
+                                class="nav-item block py-2 px-3 text-xs text-slate-400 hover:text-white rounded-lg transition font-medium">-
+                                Bidang Dalduk</a>
+                            <a href="#" id="menu-link-realisasi-target-kb" onclick="loadContent('realisasi-target-kb')"
+                                class="nav-item block py-2 px-3 text-xs text-slate-400 hover:text-white rounded-lg transition font-medium">-
+                                Bidang KB</a>
+                            <a href="#" id="menu-link-realisasi-target-ks" onclick="loadContent('realisasi-target-ks')"
+                                class="nav-item block py-2 px-3 text-xs text-slate-400 hover:text-white rounded-lg transition font-medium">-
+                                Bidang KS</a>
+                            <a href="#" id="menu-link-realisasi-target-pppa"
+                                onclick="loadContent('realisasi-target-pppa')"
+                                class="nav-item block py-2 px-3 text-xs text-slate-400 hover:text-white rounded-lg transition font-medium">-
+                                Bidang PPPA</a>
+                            <a href="#" id="menu-link-realisasi-target-sekretariat"
+                                onclick="loadContent('realisasi-target-sekretariat')"
+                                class="nav-item block py-2 px-3 text-xs text-slate-400 hover:text-white rounded-lg transition font-medium">-
+                                Sekretariat</a>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+
+            <div class="p-4 border-t border-slate-800 bg-slate-950/30">
+                <button onclick="processLogout()"
+                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 hover:text-red-300 transition text-sm font-semibold text-left">
+                    <i class="fa-solid fa-right-from-bracket w-5"></i> Keluar / Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Area Utama -->
+        <div class="flex-1 flex flex-col md:ml-64">
+            <header
+                class="bg-white/80 backdrop-blur-md shadow-sm h-16 flex items-center justify-between px-6 sticky top-0 z-40 border-b border-slate-200/80">
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleSidebar()" class="md:hidden text-slate-600 hover:text-black">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                    <h2 id="page-title" class="font-extrabold text-slate-800 text-lg">Ringkasan Dashboard Program</h2>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-sm font-bold text-slate-800" id="user-display">Admin</p>
+                        <span id="role-badge"
+                            class="inline-block text-[10px] font-black px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 uppercase tracking-wider">MODE
+                            ADMIN</span>
+                    </div>
+                    <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-black shadow-md shadow-blue-500/20">
+                        BP
+                    </div>
+                </div>
+            </header>
+
+            <main id="main-content" class="p-6 md:p-8 flex-1">
+                <!-- Konten Dimuat Otomatis -->
+            </main>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL EDIT & TAMBAH DATA                   -->
+    <!-- ========================================== -->
+    <div id="crud-modal"
+        class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-5 border border-slate-100">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 id="modal-title" class="text-lg font-black text-slate-800">Edit Data Program</h3>
+                <button onclick="closeModal()"
+                    class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+
+            <form onsubmit="saveData(event)" class="space-y-4">
+                <input type="hidden" id="edit-array-index">
+                <input type="hidden" id="current-page-key">
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1" id="label-col-1">Kode /
+                        Indikator</label>
+                    <input type="text" id="modal-col1" required
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1" id="label-col-2">Uraian /
+                        Deskripsi</label>
+                    <textarea id="modal-col2" required rows="3"
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1" id="label-col-3">Jumlah /
+                            Target</label>
+                        <input type="text" id="modal-col3" required
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1" id="label-col-4">Status /
+                            Keterangan</label>
+                        <input type="text" id="modal-col4" required
+                            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="pt-3 flex justify-end gap-2 border-t border-slate-100">
+                    <button type="button" onclick="closeModal()"
+                        class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs">Batal</button>
+                    <button type="submit"
+                        class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-500/20">Simpan
+                        Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- SCRIPT JAVASCRIPT                          -->
+    <!-- ========================================== -->
+    <script>
+        let currentUserRole = 'admin';
+
+        // DATABASE DEFAULT
+        const defaultData = {
+            'pagu-apbd': [
+                { c1: '2.14.01.2.01.0001', c2: 'Penyusunan Dokumen Perencanaan Perangkat Daerah', c3: 'Rp 25.000.000', c4: 'APBD Murni' },
+                { c1: '2.14.01.2.01.0007', c2: 'Evaluasi Kinerja Perangkat Daerah', c3: 'Rp 15.000.000', c4: 'APBD Murni' },
+                { c1: '2.14.01.2.02.0001', c2: 'Penyediaan Gaji dan Tunjangan ASN', c3: 'Rp 8.188.656.274', c4: 'APBD Murni' },
+                { c1: '2.14.01.2.02.0007', c2: 'Koordinasi & Penyusunan Laporan Keuangan Bulanan/Triwulanan', c3: 'Rp 25.000.000', c4: 'APBD Murni' },
+                { c1: '2.14.01.2.06.0001', c2: 'Penyediaan Komponen Instalasi Listrik/Penerangan Bangunan Kantor', c3: 'Rp 25.000.000', c4: 'APBD Murni' },
+                { c1: '2.14.01.2.06.0002', c2: 'Penyediaan Peralatan dan Perlengkapan Kantor', c3: 'Rp 150.000.000', c4: 'APBD Murni' }
+            ],
+            'pagu-bokb': [
+                { c1: 'DAK-BOKB-01', c2: 'Operasional Pendampingan Keluarga Risiko Stunting (KRS) oleh TPK', c3: 'Rp 5.933.400.000', c4: 'DAK BOKB' },
+                { c1: 'DAK-BOKB-02', c2: 'Pelatihan dan Edukasi Gizi Melalui DASHAT di Kampung KB', c3: 'Rp 525.000.000', c4: 'DAK BOKB' },
+                { c1: 'DAK-BOKB-03', c2: 'Pelaksanaan Pemutakhiran Data KRS', c3: 'Rp 225.600.000', c4: 'DAK BOKB' }
+            ],
+            'pagu-boppa': [
+                { c1: 'DAK-BOPPA-01', c2: 'Fasilitasi Pemenuhan Hak Anak (PHA) dan Kabupaten Layak Anak', c3: 'Rp 210.000.000', c4: 'DAK BOPPA' },
+                { c1: 'DAK-BOPPA-02', c2: 'Penguatan Kelembagaan Perlindungan Perempuan dan Anak', c3: 'Rp 198.000.000', c4: 'DAK BOPPA' }
+            ],
+            'realisasi-apbd': [
+                { c1: '2.14.01.2.02.0001', c2: 'Realisasi Pembayaran Gaji ASN & Tunjangan', c3: 'Rp 3.887.632.990', c4: 'Terserap (47.4%)' },
+                { c1: '2.14.01.2.01.0001', c2: 'Realisasi Penyusunan Dokumen Perencanaan', c3: 'Rp 35.000.000', c4: 'Terserap (77.7%)' }
+            ],
+            'realisasi-bokb': [
+                { c1: 'DAK-BOKB-01', c2: 'Realisasi Pendampingan Keluarga Risiko Stunting (KRS) oleh TPK', c3: 'Rp 1.618.200.000', c4: 'Terserap (27.2%)' }
+            ],
+            'realisasi-boppa': [
+                { c1: 'DAK-BOPPA-01', c2: 'Realisasi Fasilitasi Pemenuhan Hak Anak (PHA)', c3: 'Rp 105.000.000', c4: 'Terserap (50.0%)' }
+            ],
+            'target-dalduk': [
+                { c1: 'Jumlah Dokumen Perencanaan Bidang Dalduk', c2: 'Penyusunan Profil Pengendalian Penduduk', c3: '9 Dokumen', c4: 'Terwujudnya Perencanaan' }
+            ],
+            'target-kb': [
+                { c1: 'Cakupan Peserta KB Aktif', c2: 'Pelayanan KB Metode Kontrasepsi Jangka Panjang (MKJP)', c3: '100 Persen', c4: 'Tercapai' }
+            ],
+            'target-ks': [
+                { c1: 'Intervensi Keluarga Sejahtera', c2: 'Pendataan Keluarga dan Pemetaan Wilayah rentan', c3: '100% Target', c4: 'On Track' }
+            ],
+            'target-pppa': [
+                { c1: 'Fasilitasi Kabupaten Layak Anak', c2: 'Penguatan Gugus Tugas KLA Kabupaten Kuningan', c3: '5 Indikator', c4: 'Optimal' }
+            ],
+            'target-sekretariat': [
+                { c1: 'Ketepatan Laporan Keuangan SKPD', c2: 'Penyusunan LAKIP dan Laporan Bulanan Tepat Waktu', c3: '12 Dokumen', c4: 'Sesuai Standar' }
+            ],
+            'realisasi-target-dalduk': [
+                { c1: 'Indeks Pembangunan Berwawasan Kependudukan', c2: 'Capaian Indikator Kinerja Daerah (IKD)', c3: 'Target: 65 | Capaian: 61.6', c4: 'BKKBN Pusat' }
+            ],
+            'realisasi-target-kb': [
+                { c1: 'Laju Pertumbuhan Penduduk (LPP)', c2: 'Nilai Resmi Publikasi BPS Kabupaten Kuningan', c3: 'Target: 1.03% | Capaian: 0', c4: 'BPS Resmi' }
+            ],
+            'realisasi-target-ks': [
+                { c1: 'Indeks Pembangunan Keluarga (I-Bangga)', c2: 'Pengukuran Ketahanan dan Kualitas Keluarga', c3: 'Target: 63.88 | Capaian: 0', c4: 'Kementerian' }
+            ],
+            'realisasi-target-pppa': [
+                { c1: 'Indeks Perlindungan Anak (IPA)', c2: 'Persentase Perlindungan Anak Terhadap Kekerasan', c3: 'Target: 100% | Capaian: 0', c4: 'Kemen PPPA' }
+            ],
+            'realisasi-target-sekretariat': [
+                { c1: 'Indeks Pembangunan Kualitas Keluarga (IPKK)', c2: 'Capaian Kinerja Utama (IKU) Sekretariat SKPD', c3: 'Target: 53.09 | Capaian: 0', c4: 'Tervalidasi' }
+            ]
+        };
+
+        function getAppData() {
+            let saved = localStorage.getItem('planlap_db_2026');
+            if (!saved) {
+                localStorage.setItem('planlap_db_2026', JSON.stringify(defaultData));
+                return defaultData;
+            }
+            return JSON.parse(saved);
+        }
+
+        function saveAppData(data) {
+            localStorage.setItem('planlap_db_2026', JSON.stringify(data));
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
+            }
+        }
+
+        // --- HANDLER LOGIN DENGAN VALIDASI PASSWORD FIXED ---
+        function handleLogin(event) {
+            event.preventDefault();
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const errorMsg = document.getElementById('login-error-msg');
+            const selectedRole = document.querySelector('input[name="userRole"]:checked').value;
+
+            // CEK KATASANDI TETAP: "program12"
+            if (pass !== 'program12') {
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            errorMsg.classList.add('hidden');
+            currentUserRole = selectedRole;
+
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('dashboard-page').classList.remove('hidden');
+            document.getElementById('user-display').innerText = user || (selectedRole === 'admin' ? 'Administrator' : 'Pegawai SKPD');
+
+            const badge = document.getElementById('role-badge');
+            if (selectedRole === 'admin') {
+                badge.innerText = 'MODE ADMIN';
+                badge.className = 'inline-block text-[10px] font-black px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 uppercase tracking-wider';
+            } else {
+                badge.innerText = 'MODE PEGAWAI';
+                badge.className = 'inline-block text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 uppercase tracking-wider';
+            }
+
+            loadContent('home');
+        }
+
+        function processLogout() {
+            document.getElementById('dashboard-page').classList.add('hidden');
+            document.getElementById('login-page').classList.remove('hidden');
+            document.getElementById('password').value = '';
+            document.getElementById('username').value = '';
+            document.getElementById('login-error-msg').classList.add('hidden');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        }
+
+        function toggleDropdown(menuId) {
+            const dropdown = document.getElementById(menuId);
+            const icon = document.getElementById('icon-' + menuId.replace('menu-', ''));
+            dropdown.classList.toggle('hidden');
+            if (icon) icon.classList.toggle('rotate-180');
+        }
+
+        function setActiveMenu(pageKey) {
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('bg-blue-600', 'text-white', 'font-bold', 'shadow-md', 'shadow-blue-600/30');
+                el.classList.add('text-slate-400', 'hover:text-white');
+            });
+
+            const activeEl = document.getElementById('menu-link-' + pageKey);
+            if (activeEl) {
+                activeEl.classList.remove('text-slate-400', 'hover:text-white');
+                activeEl.classList.add('bg-blue-600', 'text-white', 'font-bold', 'shadow-md', 'shadow-blue-600/30');
+
+                const parentDropdown = activeEl.closest('div[id^="menu-"]');
+                if (parentDropdown) {
+                    parentDropdown.classList.remove('hidden');
+                    const icon = document.getElementById('icon-' + parentDropdown.id.replace('menu-', ''));
+                    if (icon) icon.classList.add('rotate-180');
+                }
+            }
+        }
+
+        function printDocument() { window.print(); }
+
+        function exportToExcel(tableID, filename) {
+            const table = document.getElementById(tableID);
+            if (!table) return alert('Tabel tidak ditemukan!');
+            const wb = XLSX.utils.table_to_book(table, { sheet: "Data SKPD" });
+            XLSX.writeFile(wb, (filename || 'Laporan_PLANLAP_2026') + '.xlsx');
+        }
+
+        function exportToWord(elementID, filename) {
+            const html = document.getElementById(elementID).innerHTML;
+            const blob = new Blob(['\ufeff' + `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                <head><meta charset='utf-8'><title>Export Word</title>
+                <style>
+                    table { border-collapse: collapse; width: 100%; }
+                    th, td { border: 1px solid #000; padding: 6px; font-family: Arial; font-size: 10pt; }
+                    th { background-color: #f2f2f2; }
+                </style></head><body>${html}</body></html>
+            `], { type: 'application/msword' });
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = (filename || 'Laporan_PLANLAP_2026') + '.doc';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function filterTable(inputId, tableId) {
+            const input = document.getElementById(inputId);
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById(tableId);
+            const tr = table.getElementsByTagName("tr");
+
+            for (let i = 1; i < tr.length; i++) {
+                let showRow = false;
+                const tdList = tr[i].getElementsByTagName("td");
+                for (let j = 0; j < tdList.length; j++) {
+                    if (tdList[j]) {
+                        if (tdList[j].innerText.toLowerCase().indexOf(filter) > -1) {
+                            showRow = true;
+                            break;
+                        }
+                    }
+                }
+                tr[i].style.display = showRow ? "" : "none";
+            }
+        }
+
+        function openAddModal(pageKey) {
+            document.getElementById('modal-title').innerText = 'Tambah Data Baru';
+            document.getElementById('current-page-key').value = pageKey;
+            document.getElementById('edit-array-index').value = '-1';
+
+            document.getElementById('modal-col1').value = '';
+            document.getElementById('modal-col2').value = '';
+            document.getElementById('modal-col3').value = '';
+            document.getElementById('modal-col4').value = 'Aktif / Valid';
+
+            document.getElementById('crud-modal').classList.remove('hidden');
+        }
+
+        function openEditModal(pageKey, index) {
+            const db = getAppData();
+            const item = db[pageKey][index];
+
+            document.getElementById('modal-title').innerText = 'Edit Data';
+            document.getElementById('current-page-key').value = pageKey;
+            document.getElementById('edit-array-index').value = index;
+
+            document.getElementById('modal-col1').value = item.c1;
+            document.getElementById('modal-col2').value = item.c2;
+            document.getElementById('modal-col3').value = item.c3;
+            document.getElementById('modal-col4').value = item.c4;
+
+            document.getElementById('crud-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('crud-modal').classList.add('hidden');
+        }
+
+        function saveData(event) {
+            event.preventDefault();
+            const pageKey = document.getElementById('current-page-key').value;
+            const arrayIndex = parseInt(document.getElementById('edit-array-index').value);
+
+            const c1 = document.getElementById('modal-col1').value;
+            const c2 = document.getElementById('modal-col2').value;
+            const c3 = document.getElementById('modal-col3').value;
+            const c4 = document.getElementById('modal-col4').value;
+
+            let db = getAppData();
+            if (!db[pageKey]) db[pageKey] = [];
+
+            if (arrayIndex === -1) {
+                db[pageKey].push({ c1, c2, c3, c4 });
+            } else {
+                db[pageKey][arrayIndex] = { c1, c2, c3, c4 };
+            }
+
+            saveAppData(db);
+            closeModal();
+            loadContent(pageKey);
+            alert('Perubahan berhasil disimpan!');
+        }
+
+        function deleteRow(pageKey, index) {
+            if (confirm('Apakah Anda yakin ingin menghapus data ini secara permanen?')) {
+                let db = getAppData();
+                if (db[pageKey]) {
+                    db[pageKey].splice(index, 1);
+                    saveAppData(db);
+                    loadContent(pageKey);
+                    alert('Data berhasil dihapus!');
+                }
+            }
+        }
+
+        function loadContent(pageKey) {
+            setActiveMenu(pageKey);
+            const titleEl = document.getElementById('page-title');
+            const mainContent = document.getElementById('main-content');
+            let db = getAppData();
+            let htmlContent = '';
+            let titleText = '';
+
+            switch (pageKey) {
+                case 'home':
+                    titleText = 'Ringkasan Dashboard Program 2026';
+                    htmlContent = `
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 hover:shadow-md transition flex items-center justify-between">
+                                    <div class="space-y-1">
+                                        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Pagu APBD</p>
+                                        <h3 class="text-2xl font-black text-slate-900 leading-none">Rp 11.051 M</h3>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shadow-inner">
+                                        <i class="fa-solid fa-wallet"></i>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 hover:shadow-md transition flex items-center justify-between">
+                                    <div class="space-y-1">
+                                        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Pagu DAK BOKB</p>
+                                        <h3 class="text-2xl font-black text-slate-900 leading-none">Rp 10.009 M</h3>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner">
+                                        <i class="fa-solid fa-hand-holding-dollar"></i>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 hover:shadow-md transition flex items-center justify-between">
+                                    <div class="space-y-1">
+                                        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Pagu DAK BOPPA</p>
+                                        <h3 class="text-2xl font-black text-slate-900 leading-none">Rp 408 Juta</h3>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shadow-inner">
+                                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 hover:shadow-md transition flex items-center justify-between">
+                                    <div class="space-y-1">
+                                        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Anggaran SKPD</p>
+                                        <h3 class="text-2xl font-black text-slate-900 leading-none">Rp 21.468 M</h3>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shadow-inner">
+                                        <i class="fa-solid fa-sitemap"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="font-bold text-slate-800 text-base">Grafik Perbandingan Realisasi Anggaran 2026</h3>
+                                    <span class="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-bold">Triwulan I & II</span>
+                                </div>
+                                <div class="relative w-full h-[350px]">
+                                    <canvas id="barChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    setTimeout(renderHomeChart, 50);
+                    break;
+
+                // MENU 1: PAGU ANGGARAN
+                case 'pagu-apbd':
+                    titleText = 'Pagu Anggaran Tahun 2026 - APBD';
+                    htmlContent = generateTableTemplate(titleText, db['pagu-apbd'] || [], pageKey, 'Kode Rekening', 'Uraian Program / Kegiatan', 'Jumlah Anggaran', 'Sumber / Status');
+                    break;
+                case 'pagu-bokb':
+                    titleText = 'Pagu Anggaran Tahun 2026 - APBN DAK BOKB NF';
+                    htmlContent = generateTableTemplate(titleText, db['pagu-bokb'] || [], pageKey, 'Kode Kegiatan', 'Uraian Kegiatan', 'Jumlah Anggaran', 'Sumber / Status');
+                    break;
+                case 'pagu-boppa':
+                    titleText = 'Pagu Anggaran Tahun 2026 - APBN DAK BOPPA NF';
+                    htmlContent = generateTableTemplate(titleText, db['pagu-boppa'] || [], pageKey, 'Kode Sub Kegiatan', 'Uraian Sub Kegiatan', 'Jumlah Anggaran', 'Sumber / Status');
+                    break;
+
+                // MENU 2: REALISASI ANGGARAN
+                case 'realisasi-apbd':
+                    titleText = 'Realisasi Anggaran Tahun 2026 - APBD';
+                    htmlContent = generateTableTemplate(titleText, db['realisasi-apbd'] || [], pageKey, 'Kode Rekening', 'Uraian Realisasi', 'Jumlah Serapan', 'Status Serapan');
+                    break;
+                case 'realisasi-bokb':
+                    titleText = 'Realisasi Anggaran Tahun 2026 - DAK BOKB NF';
+                    htmlContent = generateTableTemplate(titleText, db['realisasi-bokb'] || [], pageKey, 'Kode Kegiatan', 'Uraian Realisasi DAK BOKB', 'Jumlah Serapan', 'Status Serapan');
+                    break;
+                case 'realisasi-boppa':
+                    titleText = 'Realisasi Anggaran Tahun 2026 - DAK BOPPA NF';
+                    htmlContent = generateTableTemplate(titleText, db['realisasi-boppa'] || [], pageKey, 'Kode Sub Kegiatan', 'Uraian Realisasi DAK BOPPA', 'Jumlah Serapan', 'Status Serapan');
+                    break;
+
+                // MENU 3: TARGET KINERJA
+                case 'target-dalduk':
+                case 'target-kb':
+                case 'target-ks':
+                case 'target-pppa':
+                case 'target-sekretariat':
+                    let unitTarget = pageKey.replace('target-', '').toUpperCase();
+                    titleText = 'Target Kinerja Tahun 2026 - Bidang ' + unitTarget;
+                    htmlContent = generateTableTemplate(titleText, db[pageKey] || [], pageKey, 'Indikator / Output', 'Deskripsi Program', 'Target Capaian', 'Sasaran Program');
+                    break;
+
+                // MENU 4: REALISASI TARGET KINERJA
+                case 'realisasi-target-dalduk':
+                case 'realisasi-target-kb':
+                case 'realisasi-target-ks':
+                case 'realisasi-target-pppa':
+                case 'realisasi-target-sekretariat':
+                    let unitReal = pageKey.replace('realisasi-target-', '').toUpperCase();
+                    titleText = 'Realisasi Target Kinerja 2026 - Bidang ' + unitReal;
+                    htmlContent = generateTableTemplate(titleText, db[pageKey] || [], pageKey, 'Indikator IKU / IKK / IKD', 'Uraian Kinerja', 'Target & Capaian Semester I', 'Keterangan / Sumber');
+                    break;
+
+                default:
+                    titleText = 'Dashboard Program';
+                    htmlContent = `<div class="bg-white p-6 rounded-2xl shadow-sm"><p>Konten sedang dimuat...</p></div>`;
+            }
+
+            titleEl.innerText = titleText;
+            mainContent.innerHTML = htmlContent;
+        }
+
+        function generateTableTemplate(title, dataArray, pageKey, h1, h2, h3, h4) {
+            let rows = '';
+            let adminBtnHeader = currentUserRole === 'admin' ? `<th class="py-3.5 px-6 font-extrabold text-center no-print">Aksi</th>` : '';
+
+            dataArray.forEach((item, index) => {
+                let adminBtnCell = currentUserRole === 'admin' ? `
+                    <td class="py-4 px-6 text-center no-print">
+                        <div class="inline-flex gap-1.5">
+                            <button onclick="openEditModal('${pageKey}', ${index})" class="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold transition">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            </button>
+                            <button onclick="deleteRow('${pageKey}', ${index})" class="bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold transition">
+                                <i class="fa-solid fa-trash-can"></i> Hapus
+                            </button>
+                        </div>
+                    </td>
+                ` : '';
+
+                rows += `
+                    <tr class="hover:bg-blue-50/40 transition duration-150">
+                        <td class="py-4 px-6 font-bold text-slate-400 text-center">${index + 1}</td>
+                        <td class="py-4 px-6 font-mono text-xs font-bold text-slate-600">${item.c1}</td>
+                        <td class="py-4 px-6 font-bold text-slate-800">${item.c2}</td>
+                        <td class="py-4 px-6 font-extrabold text-blue-600 text-base">${item.c3}</td>
+                        <td class="py-4 px-6">
+                            <span class="bg-slate-100 text-slate-700 text-[11px] font-bold px-3 py-1 rounded-full border border-slate-200">
+                                ${item.c4}
+                            </span>
+                        </td>
+                        ${adminBtnCell}
+                    </tr>
+                `;
+            });
+
+            let adminAddBtn = currentUserRole === 'admin' ? `
+                <button onclick="openAddModal('${pageKey}')" class="no-print bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-md shadow-emerald-600/20 transition">
+                    <i class="fa-solid fa-plus"></i> Tambah Data
+                </button>
+            ` : '';
+
+            return `
+                <div class="space-y-6">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between no-print">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Baris Data Aktif</p>
+                            <h4 class="text-2xl font-black text-slate-800 mt-1">${dataArray.length} Item</h4>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-database"></i>
+                        </div>
+                    </div>
+
+                    <div id="box-${pageKey}" class="card-box bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden space-y-4">
+                        <div class="p-6 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 bg-slate-50/50">
+                            <div>
+                                <h3 class="font-extrabold text-slate-800 text-lg">${title}</h3>
+                                <p class="text-xs font-medium text-slate-400 mt-0.5">DPPKBP3A Kabupaten Kuningan TA 2026</p>
+                            </div>
+                            
+                            <div class="flex flex-wrap items-center gap-2.5 no-print">
+                                ${adminAddBtn}
+                                <button onclick="exportToExcel('table-${pageKey}', '${title}')" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition border border-emerald-200">
+                                    <i class="fa-solid fa-file-excel"></i> Excel
+                                </button>
+                                <button onclick="exportToWord('box-${pageKey}', '${title}')" class="bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition border border-blue-200">
+                                    <i class="fa-solid fa-file-word"></i> Word
+                                </button>
+                                <button onclick="printDocument()" class="bg-slate-900 text-white hover:bg-black px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-md shadow-slate-900/20">
+                                    <i class="fa-solid fa-print"></i> Print / PDF
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="px-6 pt-2 pb-1 no-print">
+                            <div class="relative w-full md:w-72">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                                <input type="text" id="search-${pageKey}" onkeyup="filterTable('search-${pageKey}', 'table-${pageKey}')" placeholder="Cari data dalam tabel..." 
+                                    class="w-full pl-9 pr-4 py-2 bg-slate-100/80 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition">
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table id="table-${pageKey}" class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-slate-900 text-white border-b border-slate-800">
+                                        <th class="py-3.5 px-6 font-bold text-center w-12">No</th>
+                                        <th class="py-3.5 px-6 font-bold">${h1}</th>
+                                        <th class="py-3.5 px-6 font-bold">${h2}</th>
+                                        <th class="py-3.5 px-6 font-bold">${h3}</th>
+                                        <th class="py-3.5 px-6 font-bold">${h4}</th>
+                                        ${adminBtnHeader}
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-slate-700">
+                                    ${rows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderHomeChart() {
+            const ctx = document.getElementById('barChart');
+            if (!ctx) return;
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Des'],
+                    datasets: [
+                        {
+                            label: 'Pagu APBD (Miliar)',
+                            data: [1.1, 1.5, 2.1, 2.8, 3.2, 3.0, 2.5, 2.9, 3.1, 3.0, 2.7, 3.0],
+                            backgroundColor: '#3b82f6',
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'DAK BOKB (Miliar)',
+                            data: [0.8, 1.0, 1.5, 1.8, 2.2, 2.3, 1.8, 2.0, 2.2, 2.0, 2.5, 2.4],
+                            backgroundColor: '#10b981',
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'DAK BOPPA (Juta)',
+                            data: [30, 40, 50, 80, 80, 90, 60, 50, 80, 40, 90, 40],
+                            backgroundColor: '#f59e0b',
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
