@@ -27,21 +27,50 @@
             max-height: 250px;
         }
 
-        /* CSS Khusus Cetak/Print Multi-Halaman */
+       /* ================================================= */
+        /* CSS KHUSUS CETAK/PRINT: HANYA TABEL & JUDUL KETENGAH */
+        /* ================================================= */
         @media print {
-            body { background: white !important; color: black !important; }
-            #sidebar, header, .no-print, #crud-modal { display: none !important; }
-            .md\:ml-64 { margin-left: 0 !important; }
-            main { padding: 0 !important; }
-            .card-box { border: none !important; shadow: none !important; }
-            table { width: 100% !important; border-collapse: collapse !important; page-break-inside: auto; }
-            tr { page-break-inside: avoid; page-break-after: auto; }
-            thead { display: table-header-group; }
-            th, td { border: 1px solid #ddd !important; padding: 8px !important; }
+            body * {
+                visibility: hidden !important;
+            }
+            #printable-area, #printable-area * {
+                visibility: visible !important;
+            }
+            #printable-area {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 10px !important;
+                background: white !important;
+            }
+            /* Sembunyikan 2 teks di atas, sisakan judul lalu centerekan */
+            .print-hidden-meta {
+                display: none !important;
+            }
+            .print-centered-title {
+                text-align: center !important;
+                display: block !important;
+                font-size: 16px !important;
+                font-weight: bold !important;
+                margin-bottom: 15px !important;
+                visibility: visible !important;
+            }
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+            }
+            th, td {
+                border: 1px solid #cbd5e1 !important;
+                padding: 6px 8px !important;
+                font-size: 11px !important;
+            }
+            .no-print {
+                display: none !important;
+            }
         }
-    </style>
-</head>
-<body class="bg-slate-100 min-h-screen text-slate-800">
 
     <!-- ========================================== -->
     <!-- BAGIAN 1: HALAMAN LOGIN                    -->
