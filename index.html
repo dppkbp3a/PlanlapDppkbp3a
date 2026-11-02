@@ -27,7 +27,7 @@
             max-height: 250px;
         }
 
-       /* ================================================= */
+        /* ================================================= */
         /* CSS KHUSUS CETAK/PRINT: HANYA TABEL & JUDUL KETENGAH */
         /* ================================================= */
         @media print {
@@ -71,6 +71,9 @@
                 display: none !important;
             }
         }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800">
 
     <!-- ========================================== -->
     <!-- BAGIAN 1: HALAMAN LOGIN                    -->
@@ -842,7 +845,13 @@
                             </div>
                         </div>
 
-                        <div class="overflow-x-auto">
+                        <!-- AREA YANG AKAN DICETAK (Hanya Tabel & Judul Terpusat) -->
+                        <div id="printable-area" class="overflow-x-auto p-6 pt-2">
+                            <div class="print-hidden-meta mb-2">
+                                <p class="text-xs font-bold text-slate-500">Sistem Informasi Bidang Program - DPPKBP3A Kab. Kuningan</p>
+                            </div>
+                            <h2 class="print-centered-title text-base font-black text-slate-800 mb-4 hidden">${title}</h2>
+                            
                             <table id="table-${pageKey}" class="w-full text-left border-collapse text-sm">
                                 <thead>
                                     <tr class="bg-slate-900 text-white border-b border-slate-800">
