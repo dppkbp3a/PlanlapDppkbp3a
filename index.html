@@ -97,7 +97,7 @@
                     <!-- Pesan Error Password -->
                     <div id="login-error-msg" class="hidden mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-bold flex items-center gap-2">
                         <i class="fa-solid fa-circle-exclamation text-sm"></i>
-                        <span>kata sandi salah coba lagi</span>
+                        <span id="error-text">kata sandi salah coba lagi</span>
                     </div>
 
                     <form onsubmit="handleLogin(event)" class="space-y-5">
@@ -111,7 +111,7 @@
                         <div class="relative border-b-2 border-slate-300 focus-within:border-blue-600 transition pb-2">
                             <div class="flex items-center">
                                 <span class="text-blue-600 mr-3 text-lg"><i class="fa-solid fa-lock"></i></span>
-                                <input type="password" id="password" placeholder="Password" required
+                                <input type="password" id="password" placeholder="Password Sistem / Admin" required
                                     class="w-full bg-transparent border-none outline-none text-slate-800 placeholder-slate-400 text-sm font-medium pr-10">
                                 <button type="button" onclick="togglePassword()" class="absolute right-0 text-slate-400 hover:text-slate-600">
                                     <i id="eyeIcon" class="fa-solid fa-eye-slash"></i>
@@ -417,11 +417,26 @@
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
             const errorMsg = document.getElementById('login-error-msg');
+            const errorText = document.getElementById('error-text');
             const selectedRole = document.querySelector('input[name="userRole"]:checked').value;
             
-            if (pass !== 'program12') {
-                errorMsg.classList.remove('hidden');
-                return;
+            // Pengecekan password berdasarkan Mode Akses
+            if (selectedRole === 'admin') {
+                // Password khusus untuk masuk sebagai Admin (bisa kamu ubah kodenya di sini jika mau)
+                const adminSecretPassword = 'AdminProgram'; 
+                
+                if (pass !== adminSecretPassword) {
+                    errorText.innerText = "Password Admin salah! Akses ditolak.";
+                    errorMsg.classList.remove('hidden');
+                    return;
+                }
+            } else {
+                // Password untuk Pegawai (menggunakan password lama: program12)
+                if (pass !== 'program12') {
+                    errorText.innerText = "Kata sandi salah coba lagi";
+                    errorMsg.classList.remove('hidden');
+                    return;
+                }
             }
 
             errorMsg.classList.add('hidden');
